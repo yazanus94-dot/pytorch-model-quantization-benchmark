@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "model-quantization-benchmark"
+version = "0.1.0"
+description = "Benchmark FP32, dynamic INT8, and static INT8 ResNet18 inference with PyTorch Profiler."
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.6",
+  "torchvision>=0.21",
+  "pillow>=10.0",
+  "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+quant-bench = "quant_bench.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

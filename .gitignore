@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+*.egg-info/
+data/imagenette2-160/
+data/*.tgz
+artifacts/*.json
+artifacts/*.csv
+artifacts/*.pt
+artifacts/profiler/*.json
+!artifacts/.gitkeep
+!artifacts/profiler/.gitkeep
+
+# Keep compact benchmark evidence in Git
+!artifacts/benchmark_results.json
+!artifacts/benchmark_results.csv
+!artifacts/profiler/*_top_ops.csv
