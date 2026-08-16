@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-08-15T19:11:20.421109+00:00",
+    "python": "3.12.12",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "processor": "arm",
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "torch_threads": 1,
+    "dataset": "Imagenette2-160 validation",
+    "dataset_fingerprint": "ebe90364dfb8ae82",
+    "evaluation_limit": 1000,
+    "calibration_samples": 256,
+    "batch_size": 32,
+    "warmup": 10,
+    "iterations": 50,
+    "quantized_backend": "qnnpack"
+  },
+  "results": [
+    {
+      "variant": "fp32",
+      "dtype": "float32",
+      "latency_ms_mean": 1232.9606016999999,
+      "latency_ms_p50": 1226.6484375,
+      "latency_ms_p95": 1264.82200395,
+      "throughput_images_per_s": 25.95378956625099,
+      "serialized_size_mb": 44.66620922088623,
+      "peak_process_rss_mb": 1074.5,
+      "top1_accuracy": 72.2,
+      "top5_accuracy": 91.7,
+      "accuracy_samples": 1000,
+      "backend": null
+    },
+    {
+      "variant": "dynamic_int8",
+      "dtype": "qint8 weights / fp32 activations",
+      "latency_ms_mean": 1261.9645075600001,
+      "latency_ms_p50": 1256.8713539999999,
+      "latency_ms_p95": 1302.1095897999999,
+      "throughput_images_per_s": 25.35729000958338,
+      "serialized_size_mb": 43.202094078063965,
+      "peak_process_rss_mb": 1081.0,
+      "top1_accuracy": 72.5,
+      "top5_accuracy": 91.7,
+      "accuracy_samples": 1000,
+      "backend": "qnnpack"
+    },
+    {
+      "variant": "static_int8",
+      "dtype": "int8",
+      "latency_ms_mean": 1201.75494582,
+      "latency_ms_p50": 1201.9511455,
+      "latency_ms_p95": 1229.1011208,
+      "throughput_images_per_s": 26.627724821357205,
+      "serialized_size_mb": 11.192553520202637,
+      "peak_process_rss_mb": 867.0625,
+      "top1_accuracy": 72.9,
+      "top5_accuracy": 91.9,
+      "accuracy_samples": 1000,
+      "backend": "qnnpack"
+    }
+  ]
+}
