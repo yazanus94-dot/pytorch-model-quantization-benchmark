@@ -1,67 +1,81 @@
-# Model Quantization Benchmark
+# PyTorch Model Quantization Benchmark
 
-A reproducible CPU inference benchmark for **FP32 vs dynamic INT8 vs post-training static INT8 ResNet18** using PyTorch. It measures latency, throughput, serialized model size, process RSS, top-1/top-5 accuracy, and operator-level CPU/memory behavior with `torch.profiler`.
+A reproducible CPU inference benchmark comparing **FP32 vs dynamic INT8 vs post-training static INT8 ResNet18** using PyTorch. It measures latency, throughput, serialized model size, process RSS, top-1/top-5 accuracy, and operator-level CPU/memory behavior with `torch.profiler`.
 
-The project intentionally writes benchmark numbers only after a real run. `RESULTS.md` is generated from measurements on your machine, so the repository does not contain invented performance claims.
+The project writes benchmark numbers only after a real run. `RESULTS.md` is generated from measurements on your machine, so the repository contains no invented performance claims.
 
+## Technical overview
 
-## Measured benchmark result
+This repository implements a complete quantization benchmarking pipeline:
 
-On a 1,000-image Imagenette evaluation using Apple Silicon CPU / QNNPACK, calibrated static INT8 reduced ResNet18 serialized size from **44.67 MB to 11.19 MB (~75%)** and peak process RSS from **1,074.5 MB to 867.1 MB (~19%)**. Throughput increased from **25.95 to 26.63 images/s**, while Top-1 accuracy remained within **0.7 percentage points** of the FP32 baseline.
+- **Model quantization:** FP32 baseline, dynamic INT8 (weight-only for supported modules), post-training static INT8 with calibration.
+- **Performance benchmarking:** CPU inference latency (mean, p50, p95), throughput (images/s), serialized model size, peak process RSS.
+- **Model evaluation:** Top-1 and top-5 accuracy, accuracy deltas vs FP32 baseline.
+- **Profiling:** PyTorch Profiler with CPU operator analysis, memory profiling, Chrome trace / Perfetto-compatible output.
+- **Reproducibility:** Fixed dataset slice, seed, CPU thread count, raw JSON/CSV artifacts, machine metadata.
 
-Dynamic INT8 produced substantially less benefit because ResNet18 is convolution-heavy and dynamic quantization primarily affected supported weight-heavy modules such as the final linear layer.
+## Main features
 
-See [`RESULTS.md`](RESULTS.md) for the full measurements and methodology.
+- Three quantization paths: FP32, Dynamic INT8, Static INT8
+- Calibration workflow with observer-driven post-training static quantization
+- Warmup + repeated timed execution with `torch.inference_mode()`
+- Configurable CPU thread count for reproducibility
+- Process-wide peak RSS sampling during timed inference
+- Top-1 / top-5 accuracy on real Imagenette validation data
+- Chrome trace export + top-op CSV for Perfetto analysis
+- Raw JSON/CSV artifacts + auto-generated `RESULTS.md`
+- Unit tests for config, metrics, and report generation
+- GitHub Actions CI for unit tests and smoke test
 
-## What it demonstrates
+## Architecture overview
 
-- **Model compression:** dynamic and static INT8 quantization
-- **Calibration:** observer-driven post-training static quantization
-- **Performance engineering:** warmup, repeated CPU timing, throughput, model storage footprint, process RSS
-- **Accuracy/performance tradeoffs:** measured top-1/top-5 accuracy delta vs FP32
-- **Profiling:** Chrome trace export plus top CPU/memory operations from `torch.profiler`
-- **Reproducibility:** fixed dataset slice, seed, CPU thread count, raw JSON/CSV artifacts, machine metadata
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The package is organized as:
 
-## Benchmark design
+```
+src/quant_bench/
+  config.py      # defaults + Imagenette label mapping
+  data.py        # download/load + label remapping
+  models.py      # FP32 + dynamic/static quantization
+  benchmark.py   # timing, throughput, size, RSS
+  metrics.py     # top-k accuracy
+  profiler.py    # torch.profiler traces + CSV
+  report.py      # JSON/CSV/Markdown output
+  cli.py         # entrypoint
+```
 
-| Variant | What changes | Why it is included |
-|---|---|---|
-| FP32 | Pretrained ResNet18 baseline | Reference latency/size/accuracy |
-| Dynamic INT8 | Supported weight-heavy modules are dynamically quantized | Shows weight-only/dynamic quantization behavior |
-| Static INT8 | Calibrated activations + weights quantized through the CNN path | Main deployment-oriented INT8 comparison |
+## Technologies and dependencies
 
-**Dataset:** Imagenette2-160 validation data, mapped back to the original ImageNet-1K class indices. This makes the benchmark small enough for a laptop while still computing real classification accuracy for a pretrained ImageNet model.
+- Python >= 3.10
+- PyTorch >= 2.6
+- torchvision >= 0.21
+- Pillow >= 10.0
+- psutil >= 5.9
+- pytest >= 8.0 (dev)
 
-## Setup
-
-Recommended: Python 3.11 or 3.12.
+## Installation
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 python -m pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
-On Apple Silicon, quantized CPU execution generally uses a supported backend such as QNNPACK when available. On x86, the runner prefers x86/FBGEMM-style backends. The selected backend is recorded in `RESULTS.md`.
+On Apple Silicon, quantized CPU execution generally uses QNNPACK. On x86, the runner prefers x86/FBGEMM-style backends. The selected backend is recorded in `RESULTS.md`.
 
-## Fast correctness check
+## Execution instructions
 
-This does **not** download pretrained weights or Imagenette. It just validates that all three conversion/inference paths work:
+### Fast correctness check (no download)
 
 ```bash
 quant-bench smoke
-```
-
-Or:
-
-```bash
+# or
 make smoke
 ```
 
-## Run the real benchmark
+This validates that all three conversion/inference paths work without downloading pretrained weights or Imagenette.
 
-A good laptop-sized run:
+### Run the real benchmark
 
 ```bash
 quant-bench run \
@@ -75,83 +89,102 @@ quant-bench run \
   --profile
 ```
 
-For a faster first pass:
+Faster first pass:
 
 ```bash
 quant-bench run --download --limit 250 --calibration-samples 64 --batch-size 16 --warmup 3 --iterations 10
 ```
+
+## Quantization methodology
+
+| Variant | What changes | Why it is included |
+|---|---|---|
+| FP32 | Pretrained ResNet18 baseline | Reference latency/size/accuracy |
+| Dynamic INT8 | Supported weight-heavy modules dynamically quantized | Shows weight-only/dynamic quantization behavior |
+| Static INT8 | Calibrated activations + weights quantized through CNN path | Main deployment-oriented INT8 comparison |
+
+**Dataset:** Imagenette2-160 validation data, mapped back to original ImageNet-1K class indices. Small enough for a laptop while still computing real classification accuracy.
+
+**Calibration:** Observer-driven post-training static quantization using a deterministic sample of Imagenette training images.
+
+## Benchmarking methodology
+
+See [docs/BENCHMARK_METHODOLOGY.md](docs/BENCHMARK_METHODOLOGY.md).
+
+- Same pretrained ResNet18 weights and preprocessing for each variant.
+- Same validation slice, batch size, CPU thread count, warmup count, timed iteration count.
+- Timing performed after warmup under `torch.inference_mode()`.
+- Serialized size = byte size of `torch.save(model.state_dict())`.
+- Peak RSS = max process resident memory during timed inference (process-wide, includes runtime overhead).
+- Accuracy on Imagenette validation slice using original ImageNet-1K output indices.
+
+## Results and comparison tables
+
+`RESULTS.md` is generated from actual measurements. See the current file for the last run's numbers. Re-run to regenerate on your hardware.
+
+## Accuracy versus compression analysis
+
+Static INT8 typically reduces serialized model size ~75% (44.67 MB → 11.19 MB upstream) with accuracy within ~0.7 pp of FP32. Dynamic INT8 has limited leverage on ResNet18 because convolution dominates compute and dynamic quantization targets modules such as `Linear`.
+
+## Profiling instructions
+
+When `--profile` is enabled, Chrome traces and top-op CSVs are written under `artifacts/profiler/`.
+
+```text
+artifacts/profiler/fp32_trace.json
+artifacts/profiler/fp32_top_ops.csv
+...
+```
+
+Open any `*_trace.json` in Perfetto or Chrome tracing. The companion `*_top_ops.csv` is sorted by self CPU time.
+
+Useful analysis questions:
+1. Which operators dominate FP32 inference?
+2. Which operations become quantized in static INT8?
+3. Does lower serialized model size translate to lower process RSS?
+4. Is latency improvement consistent at your chosen batch size?
+5. How much top-1 accuracy is lost, if any?
+
+## Testing instructions
+
+```bash
+pytest -q
+```
+
+Tests cover: Imagenette label mapping, top-k accuracy counting, report markdown generation.
+
+## Limitations and future development
+
+1. Imagenette is a 10-class subset of ImageNet; measured accuracy is not official ImageNet-1K validation accuracy.
+2. Dynamic quantization has limited leverage on ResNet18 (convolution-heavy).
+3. Peak RSS is process-wide, not isolated tensor memory.
+4. Eager `torch.ao.quantization` is a legacy API family; PyTorch is moving toward torchao/PT2E. A natural extension is adding a `torchao` PT2E backend for comparison.
+5. No LICENSE file existed upstream; redistribution follows GitHub's fork mechanism.
+
+## Upstream project attribution
+
+This repository is a fork of [Gopal3746/model-quantization](https://github.com/Gopal3746/model-quantization). Original authorship and Git history are preserved. Measurements originally reported upstream (Apple Silicon / QNNPACK) are retained only as reference in [docs/UPSTREAM_REFERENCE.md](docs/UPSTREAM_REFERENCE.md) and are not presented as results of this fork.
+
+See also: [docs/UPSTREAM.md](docs/UPSTREAM.md), [docs/VALIDATION.md](docs/VALIDATION.md) (upstream).
 
 ## Outputs
 
 After a successful run:
 
 ```text
-RESULTS.md                         # recruiter-readable measured summary
+RESULTS.md                         # measured summary
 artifacts/benchmark_results.json   # raw results + machine metadata
 artifacts/benchmark_results.csv    # table-friendly raw results
-artifacts/profiler/fp32_trace.json
-artifacts/profiler/fp32_top_ops.csv
-artifacts/profiler/dynamic_int8_trace.json
-artifacts/profiler/dynamic_int8_top_ops.csv
-artifacts/profiler/static_int8_trace.json
-artifacts/profiler/static_int8_top_ops.csv
-```
-
-The generated table includes:
-
-- mean and p95 batch latency
-- images/second throughput
-- serialized model size
-- peak process RSS during timed inference
-- top-1 accuracy
-- accuracy delta vs FP32
-
-## Read a profiler trace
-
-Open any `*_trace.json` in a Chrome-trace-compatible viewer such as Perfetto. The companion `*_top_ops.csv` is easier to scan in GitHub or a spreadsheet and is sorted by self CPU time.
-
-Useful questions to answer in your write-up:
-
-1. Which operators dominate FP32 inference?
-2. Which operations become quantized in static INT8?
-3. Does lower serialized model size translate to lower process RSS?
-4. Is latency improvement consistent at your chosen batch size?
-5. How much top-1 accuracy is lost, if any, on the same evaluation slice?
-
-## Why both dynamic and static quantization?
-
-Dynamic quantization is intentionally included even though it is not the strongest technique for a convolution-heavy network. For ResNet18, dynamic quantization mostly affects supported modules such as the final `Linear` layer, so its latency improvement may be small. Static quantization is the more meaningful CNN comparison because calibration enables integer execution across a larger part of the network.
-
-That difference is useful in an interview: it shows you understand that "INT8" is not a single implementation and that model architecture determines which quantization method is appropriate.
-
-## Upstream attribution
-
-This project is a fork of [Gopal3746/model-quantization](https://github.com/Gopal3746/model-quantization). Original authorship and Git history are preserved. Measurements originally reported upstream (Apple Silicon / QNNPACK) are retained only as reference in `docs/UPSTREAM_REFERENCE.md` and are not presented as results of this fork.
-
-## Tests
-
-```bash
-pytest -q
+artifacts/profiler/*_trace.json
+artifacts/profiler/*_top_ops.csv
 ```
 
 ## Repository structure
 
-```text
-src/quant_bench/
-  benchmark.py   # latency, throughput, model size, RSS
-  cli.py         # command-line entrypoint
-  config.py      # benchmark defaults + Imagenette mapping
-  data.py        # download/load Imagenette and map labels
-  metrics.py     # top-k accuracy
-  models.py      # FP32 + dynamic/static quantization
-  profiler.py    # torch.profiler trace + top-op CSV
-  report.py      # raw outputs + RESULTS.md generation
-
-tests/
-RESULTS.md
-VALIDATION.md
 ```
-
-## API note
-
-This implementation uses `torch.ao.quantization` eager APIs to make the requested dynamic/static quantization workflow explicit. PyTorch has been moving active quantization development toward **torchao/PT2E**, so treat the eager path here as a transparent benchmark implementation rather than a claim that it is the newest production API. A natural follow-up project extension is to add a `torchao` PT2E backend and compare it against the eager baseline.
+src/quant_bench/   # package source
+tests/             # unit tests
+docs/              # architecture, methodology, upstream
+artifacts/         # generated benchmark outputs
+.github/workflows/ # CI
+```
