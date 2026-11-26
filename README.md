@@ -151,7 +151,7 @@ Useful analysis questions:
 pytest -q
 ```
 
-Tests cover: Imagenette label mapping, top-k accuracy counting, report markdown generation.
+Tests cover: configuration and default paths; custom artifact-root paths; working-directory independence; calibration reproducibility; training/validation dataset separation; quantization conversion; profiler output; benchmark reporting and provenance.
 
 ## Limitations and future development
 
@@ -172,7 +172,7 @@ See also: [docs/UPSTREAM.md](docs/UPSTREAM.md), [VALIDATION.md](VALIDATION.md) (
 After a successful run:
 
 ```text
-RESULTS.md                         # measured summary
+artifacts/personal_benchmark/RESULTS.md   # measured summary
 artifacts/personal_benchmark/benchmark_results.json   # raw results + machine metadata
 artifacts/personal_benchmark/benchmark_results.csv    # table-friendly raw results
 artifacts/personal_benchmark/profiler/*_trace.json

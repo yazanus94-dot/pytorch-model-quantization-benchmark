@@ -22,4 +22,29 @@ jobs:
         run: pytest -q
       - name: Quantization smoke test
         run: quant-bench smoke --threads 1
+      - name: Verify benchmark artifact tracking rules
+        run: |
+          set -e
+          for path in \
+            artifacts/personal_benchmark/benchmark_results.json \
+            artifacts/personal_benchmark/benchmark_results.csv \
+            artifacts/personal_benchmark/profiler/fp32_top_ops.csv \
+            artifacts/upstream_reference/benchmark_results.json
+          do
+            if git check-ignore -q --no-index "$path"; then
+              echo "ERROR: $path is ignored" >&2
+              exit 1
+            fi
+            if ! git ls-files --error-unmatch "$path" >/dev/null; then
+              echo "ERROR: $path is not tracked" >&2
+              exit 1
+            fi
+            echo "OK tracked: $path"
+          done
+          if git check-ignore -q --no-index artifacts/personal_benchmark/profiler/fp32_trace.json; then
+            echo "OK ignored: artifacts/personal_benchmark/profiler/fp32_trace.json"
+          else
+            echo "ERROR: Chrome trace JSON is not ignored" >&2
+            exit 1
+          fi
 
