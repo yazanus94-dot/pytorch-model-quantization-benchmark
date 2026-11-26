@@ -25,6 +25,10 @@ def _run(args: argparse.Namespace) -> int:
     torch.manual_seed(args.seed)
     torch.set_num_threads(args.threads)
 
+    artifact_root = Path(args.artifact_root).expanduser().resolve()
+    artifact_root.mkdir(parents=True, exist_ok=True)
+    (artifact_root / "profiler").mkdir(parents=True, exist_ok=True)
+
     data_root = Path(args.data_root).resolve()
     dataset_root = data_root / "imagenette2-160"
     if args.download or not (dataset_root / "val").is_dir():
@@ -45,6 +49,7 @@ def _run(args: argparse.Namespace) -> int:
         batch_size=args.batch_size,
         calibration_samples=args.calibration_samples,
         num_workers=args.num_workers,
+        seed=args.seed,
     )
 
     print("Loading pretrained FP32 ResNet18...")
@@ -77,7 +82,7 @@ def _run(args: argparse.Namespace) -> int:
 
         if args.profile:
             sample_batch, _ = next(iter(val_loader))
-            trace, ops = profile_model(model, sample_batch, Path(args.artifact_root) / "profiler", name)
+            trace, ops = profile_model(model, sample_batch, artifact_root / "profiler", name)
             print(f"  profiler trace: {trace}")
             print(f"  top ops:        {ops}")
 
@@ -91,7 +96,6 @@ def _run(args: argparse.Namespace) -> int:
         iterations=args.iterations,
         quantized_backend=backend,
     )
-    artifact_root = Path(args.artifact_root).resolve()
     json_path, csv_path = write_machine_readable(results, artifact_root, metadata)
     results_md = artifact_root / "RESULTS.md"
     write_results_md(results_md, results, metadata)

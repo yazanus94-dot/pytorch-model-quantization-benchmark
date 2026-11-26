@@ -108,17 +108,25 @@ def make_calibration_loader(
     batch_size: int,
     calibration_samples: int,
     num_workers: int,
+    seed: int = 7,
 ) -> DataLoader:
     if calibration_samples <= 0:
         raise ValueError("calibration_samples must be > 0")
     transform = ResNet18_Weights.DEFAULT.transforms()
     train = ImagenetteImageNetLabels(dataset_root / "train", transform)
-    generator = torch.Generator().manual_seed(7)
-    if calibration_samples <= 0:
-        raise ValueError("calibration_samples must be > 0")
-    count = min(calibration_samples, len(train))
-    if count == 0:
-        raise ValueError("calibration dataset is empty")
-    indices = torch.randperm(len(train), generator=generator)[:count].tolist()
+    indices = calibration_indices(len(train), calibration_samples, seed)
     subset = Subset(train, indices)
     return DataLoader(subset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+
+
+def calibration_indices(dataset_size: int, calibration_samples: int, seed: int = 7) -> list[int]:
+    """Return deterministic calibration sample indices."""
+    if dataset_size <= 0:
+        raise ValueError("dataset_size must be > 0")
+    if calibration_samples <= 0:
+        raise ValueError("calibration_samples must be > 0")
+    count = min(calibration_samples, dataset_size)
+    if count == 0:
+        raise ValueError("calibration dataset is empty")
+    generator = torch.Generator().manual_seed(seed)
+    return torch.randperm(dataset_size, generator=generator)[:count].tolist()
