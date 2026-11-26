@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-11-26T15:22:15.861997+00:00",
+    "python": "3.14.7",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "torch": "2.15.0+cpu",
+    "torchvision": "0.29.2+cpu",
+    "torch_threads": 1,
+    "source": "fork_local",
+    "dataset": "Imagenette2-160 validation",
+    "dataset_fingerprint": "7dd9bc54dbdf2cf7",
+    "evaluation_limit": 1000,
+    "calibration_samples": 256,
+    "batch_size": 32,
+    "warmup": 10,
+    "iterations": 50,
+    "quantized_backend": "onednn"
+  },
+  "results": [
+    {
+      "variant": "fp32",
+      "dtype": "float32",
+      "latency_ms_mean": 2501.4685999999997,
+      "latency_ms_p50": 2478.21785,
+      "latency_ms_p95": 2718.8853550000003,
+      "throughput_images_per_s": 12.792485182504393,
+      "serialized_size_mb": 44.66620922088623,
+      "peak_process_rss_mb": 683.68359375,
+      "top1_accuracy": 72.2,
+      "top5_accuracy": 91.7,
+      "accuracy_samples": 1000,
+      "backend": null
+    },
+    {
+      "variant": "dynamic_int8",
+      "dtype": "qint8 weights / fp32 activations",
+      "latency_ms_mean": 2475.6958480000003,
+      "latency_ms_p50": 2446.2646,
+      "latency_ms_p95": 2642.5293949999996,
+      "throughput_images_per_s": 12.925658871161945,
+      "serialized_size_mb": 43.202155113220215,
+      "peak_process_rss_mb": 607.05078125,
+      "top1_accuracy": 72.6,
+      "top5_accuracy": 91.9,
+      "accuracy_samples": 1000,
+      "backend": "onednn"
+    },
+    {
+      "variant": "static_int8",
+      "dtype": "int8",
+      "latency_ms_mean": 809.648286,
+      "latency_ms_p50": 807.95345,
+      "latency_ms_p95": 825.49105,
+      "throughput_images_per_s": 39.52333445685822,
+      "serialized_size_mb": 11.291350364685059,
+      "peak_process_rss_mb": 403.27734375,
+      "top1_accuracy": 72.4,
+      "top5_accuracy": 92.3,
+      "accuracy_samples": 1000,
+      "backend": "onednn"
+    }
+  ]
+}

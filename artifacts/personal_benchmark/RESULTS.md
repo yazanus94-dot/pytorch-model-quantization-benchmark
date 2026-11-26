@@ -6,13 +6,13 @@
 
 | Variant | Dtype | Mean latency (ms/batch) | p95 (ms) | Throughput (img/s) | Serialized size (MB) | Peak process RSS (MB) | Top-1 (%) | Accuracy Δ vs FP32 (pp) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| fp32 | float32 | 2620.10 | 3386.02 | 12.21 | 44.67 | 706.07 | 72.20 | 0.00 |
-| dynamic_int8 | qint8 weights / fp32 activations | 2708.90 | 3639.04 | 11.81 | 43.20 | 618.97 | 72.60 | 0.40 |
-| static_int8 | int8 | 1100.30 | 1795.11 | 29.08 | 11.29 | 404.72 | 67.90 | -4.30 |
+| fp32 | float32 | 2866.03 | 3473.29 | 11.17 | 44.67 | 683.24 | 72.20 | 0.00 |
+| dynamic_int8 | qint8 weights / fp32 activations | 2869.42 | 3488.22 | 11.15 | 43.20 | 599.54 | 72.60 | 0.40 |
+| static_int8 | int8 | 942.53 | 1271.00 | 33.95 | 11.29 | 404.09 | 72.40 | 0.20 |
 
 ## Run metadata
 
-- **timestamp_utc:** `2026-11-26T10:48:44.218813+00:00`
+- **timestamp_utc:** `2026-11-26T15:11:32.158024+00:00`
 - **python:** `3.14.7`
 - **platform:** `Windows-11-10.0.26300-SP0`
 - **processor:** `Intel64 Family 6 Model 158 Stepping 10, GenuineIntel`

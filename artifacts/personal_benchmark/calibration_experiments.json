@@ -1,0 +1,54 @@
+{
+  "fp32_top1": 72.2,
+  "fp32_top5": 91.7,
+  "experiments": [
+    {
+      "calibration_samples": 256,
+      "reduce_range": null,
+      "backend": "onednn",
+      "top1_accuracy": 67.9,
+      "top5_accuracy": 87.8,
+      "samples": 1000
+    },
+    {
+      "calibration_samples": 256,
+      "reduce_range": true,
+      "backend": "onednn",
+      "top1_accuracy": 72.4,
+      "top5_accuracy": 92.3,
+      "samples": 1000
+    },
+    {
+      "calibration_samples": 512,
+      "reduce_range": null,
+      "backend": "onednn",
+      "top1_accuracy": 68.3,
+      "top5_accuracy": 88.0,
+      "samples": 1000
+    },
+    {
+      "calibration_samples": 512,
+      "reduce_range": true,
+      "backend": "onednn",
+      "top1_accuracy": 72.4,
+      "top5_accuracy": 92.2,
+      "samples": 1000
+    },
+    {
+      "calibration_samples": 1024,
+      "reduce_range": null,
+      "backend": "onednn",
+      "top1_accuracy": 67.8,
+      "top5_accuracy": 88.0,
+      "samples": 1000
+    },
+    {
+      "calibration_samples": 1024,
+      "reduce_range": true,
+      "backend": "onednn",
+      "top1_accuracy": 71.7,
+      "top5_accuracy": 92.2,
+      "samples": 1000
+    }
+  ]
+}

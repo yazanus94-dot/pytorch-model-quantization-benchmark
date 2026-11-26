@@ -52,7 +52,7 @@ def _run(args: argparse.Namespace) -> int:
     print("Building dynamic INT8 model...")
     dynamic = build_dynamic_int8_model(fp32)
     print("Calibrating and building static INT8 model...")
-    static, backend = build_static_int8_model(fp32, calibration_loader)
+    static, backend = build_static_int8_model(fp32, calibration_loader, reduce_range=args.reduce_range)
 
     variants = [
         ("fp32", "float32", fp32, None),
@@ -147,6 +147,13 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--threads", type=_positive_int, default=1, help="CPU intra-op threads for reproducibility")
     run.add_argument("--seed", type=int, default=7)
     run.add_argument("--profile", action="store_true")
+    run.add_argument(
+        "--reduce-range",
+        dest="reduce_range",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use reduce_range=True for the oneDNN HistogramObserver to improve INT8 accuracy.",
+    )
     run.set_defaults(func=_run)
 
     smoke = sub.add_parser("smoke", help="Validate model conversion without downloads")

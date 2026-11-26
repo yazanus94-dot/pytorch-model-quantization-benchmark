@@ -6,7 +6,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_ROOT = PROJECT_ROOT / "data"
-DEFAULT_ARTIFACT_ROOT = PROJECT_ROOT / "artifacts"
+DEFAULT_ARTIFACT_ROOT = PROJECT_ROOT / "artifacts" / "personal_benchmark"
 IMAGENETTE_URL = "https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-160.tgz"
 IMAGENETTE_ARCHIVE = "imagenette2-160.tgz"
 IMAGENETTE_DIRNAME = "imagenette2-160"

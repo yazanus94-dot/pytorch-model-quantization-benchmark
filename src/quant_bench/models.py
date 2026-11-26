@@ -53,7 +53,12 @@ def build_dynamic_int8_model(fp32_model: nn.Module) -> nn.Module:
         )
 
 
-def build_static_int8_model(fp32_model: nn.Module, calibration_loader) -> tuple[nn.Module, str]:
+def build_static_int8_model(
+    fp32_model: nn.Module,
+    calibration_loader,
+    *,
+    reduce_range: bool | None = None,
+) -> tuple[nn.Module, str]:
     """Post-training static INT8 using eager-mode observers + calibration."""
     if not isinstance(fp32_model, nn.Module):
         raise TypeError("fp32_model must be a torch.nn.Module")
@@ -66,7 +71,22 @@ def build_static_int8_model(fp32_model: nn.Module, calibration_loader) -> tuple[
 
     model = copy.deepcopy(fp32_model).eval()
     model.fuse_model(is_qat=False)
-    model.qconfig = get_default_qconfig(backend)
+    if reduce_range is None:
+        model.qconfig = get_default_qconfig(backend)
+    else:
+        import functools
+
+        from torch.ao.quantization import QConfig
+        from torch.ao.quantization.observer import HistogramObserver, PerChannelMinMaxObserver
+
+        model.qconfig = QConfig(
+            activation=functools.partial(HistogramObserver, reduce_range=reduce_range),
+            weight=functools.partial(
+                PerChannelMinMaxObserver,
+                dtype=torch.qint8,
+                qscheme=torch.per_channel_symmetric,
+            ),
+        )
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

@@ -128,7 +128,7 @@ Static INT8 typically reduces serialized model size ~75% (44.67 MB → 11.19 MB 
 
 ## Profiling instructions
 
-When `--profile` is enabled, Chrome traces and top-op CSVs are written under `artifacts/profiler/`.
+When `--profile` is enabled, Chrome traces and top-op CSVs are written under `artifacts/personal_benchmark/profiler/`.
 
 ```text
 artifacts/profiler/fp32_trace.json
@@ -173,10 +173,10 @@ After a successful run:
 
 ```text
 RESULTS.md                         # measured summary
-artifacts/benchmark_results.json   # raw results + machine metadata
-artifacts/benchmark_results.csv    # table-friendly raw results
-artifacts/profiler/*_trace.json
-artifacts/profiler/*_top_ops.csv
+artifacts/personal_benchmark/benchmark_results.json   # raw results + machine metadata
+artifacts/personal_benchmark/benchmark_results.csv    # table-friendly raw results
+artifacts/personal_benchmark/profiler/*_trace.json
+artifacts/personal_benchmark/profiler/*_top_ops.csv
 ```
 
 ## Repository structure

@@ -109,6 +109,8 @@ def make_calibration_loader(
     calibration_samples: int,
     num_workers: int,
 ) -> DataLoader:
+    if calibration_samples <= 0:
+        raise ValueError("calibration_samples must be > 0")
     transform = ResNet18_Weights.DEFAULT.transforms()
     train = ImagenetteImageNetLabels(dataset_root / "train", transform)
     generator = torch.Generator().manual_seed(7)
