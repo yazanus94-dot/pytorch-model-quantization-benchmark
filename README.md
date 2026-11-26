@@ -165,7 +165,7 @@ Tests cover: Imagenette label mapping, top-k accuracy counting, report markdown 
 
 This repository is a fork of [Gopal3746/model-quantization](https://github.com/Gopal3746/model-quantization). Original authorship and Git history are preserved. Measurements originally reported upstream (Apple Silicon / QNNPACK) are retained only as reference in [docs/UPSTREAM_REFERENCE.md](docs/UPSTREAM_REFERENCE.md) and are not presented as results of this fork.
 
-See also: [docs/UPSTREAM.md](docs/UPSTREAM.md), [docs/VALIDATION.md](docs/VALIDATION.md) (upstream).
+See also: [docs/UPSTREAM.md](docs/UPSTREAM.md), [VALIDATION.md](VALIDATION.md) (upstream).
 
 ## Outputs
 

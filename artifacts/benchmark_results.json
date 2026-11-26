@@ -14,7 +14,8 @@
     "batch_size": 32,
     "warmup": 10,
     "iterations": 50,
-    "quantized_backend": "qnnpack"
+    "quantized_backend": "qnnpack",
+    "source": "upstream_reference"
   },
   "results": [
     {

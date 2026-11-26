@@ -40,6 +40,9 @@ def environment_metadata(**extra) -> dict:
         "torch": torch.__version__,
         "torchvision": torchvision.__version__,
         "torch_threads": torch.get_num_threads(),
+        # Provenance: "fork_local" marks measurements produced by runs from this
+        # fork owner; retained upstream numbers are tagged "upstream_reference".
+        "source": "fork_local",
     }
     metadata.update(extra)
     return metadata
