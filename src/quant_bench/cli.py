@@ -93,7 +93,7 @@ def _run(args: argparse.Namespace) -> int:
     )
     artifact_root = Path(args.artifact_root).resolve()
     json_path, csv_path = write_machine_readable(results, artifact_root, metadata)
-    results_md = PROJECT_ROOT / "RESULTS.md"
+    results_md = artifact_root / "RESULTS.md"
     write_results_md(results_md, results, metadata)
 
     print(f"\nWrote {json_path}")

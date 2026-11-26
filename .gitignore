@@ -17,4 +17,8 @@ artifacts/profiler/*.json
 # Keep compact benchmark evidence in Git
 !artifacts/upstream_reference/
 !artifacts/upstream_reference/**
+!artifacts/personal_benchmark/
+!artifacts/personal_benchmark/**
+!artifacts/personal_benchmark/profiler/*_top_ops.csv
+artifacts/personal_benchmark/profiler/*_trace.json
 !artifacts/profiler/*_top_ops.csv
