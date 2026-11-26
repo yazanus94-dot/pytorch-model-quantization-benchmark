@@ -20,20 +20,24 @@ def build_fp32_model() -> nn.Module:
 
 def choose_quantized_backend() -> str:
     supported = set(torch.backends.quantized.supported_engines)
+    if not supported:
+        raise RuntimeError("PyTorch reports no supported quantized backends")
     machine = platform.machine().lower()
 
     if machine in {"x86_64", "amd64"}:
-        for candidate in ("x86", "fbgemm", "onednn"):
+        for candidate in ("onednn", "x86", "fbgemm"):
             if candidate in supported:
                 return candidate
-    for candidate in ("qnnpack", "x86", "fbgemm", "onednn"):
+    for candidate in ("qnnpack", "onednn", "x86", "fbgemm"):
         if candidate in supported:
             return candidate
-    raise RuntimeError(f"No supported quantized backend found: {sorted(supported)}")
+    return sorted(supported)[0]
 
 
 def build_dynamic_int8_model(fp32_model: nn.Module) -> nn.Module:
     """Dynamic INT8 for supported layers (ResNet18: principally the final Linear)."""
+    if not isinstance(fp32_model, nn.Module):
+        raise TypeError("fp32_model must be a torch.nn.Module")
     from torch.ao.quantization import quantize_dynamic
 
     backend = choose_quantized_backend()
@@ -51,6 +55,10 @@ def build_dynamic_int8_model(fp32_model: nn.Module) -> nn.Module:
 
 def build_static_int8_model(fp32_model: nn.Module, calibration_loader) -> tuple[nn.Module, str]:
     """Post-training static INT8 using eager-mode observers + calibration."""
+    if not isinstance(fp32_model, nn.Module):
+        raise TypeError("fp32_model must be a torch.nn.Module")
+    if calibration_loader is None:
+        raise ValueError("calibration_loader must not be None")
     from torch.ao.quantization import convert, get_default_qconfig, prepare
 
     backend = choose_quantized_backend()

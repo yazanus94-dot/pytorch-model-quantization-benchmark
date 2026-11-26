@@ -53,6 +53,14 @@ def measure_latency_and_rss(
     warmup: int,
     iterations: int,
 ) -> tuple[list[float], float]:
+    if not callable(model):
+        raise TypeError("model must be callable")
+    if warmup < 0:
+        raise ValueError("warmup must be >= 0")
+    if iterations <= 0:
+        raise ValueError("iterations must be > 0")
+    if not torch.is_tensor(sample_batch) or sample_batch.ndim < 1:
+        raise ValueError("sample_batch must be a non-empty tensor")
     model.eval()
     gc.collect()
 
@@ -82,6 +90,10 @@ def measure_latency_and_rss(
 
 
 def _percentile(values: list[float], q: float) -> float:
+    if not values:
+        raise ValueError("values must not be empty")
+    if q < 0.0 or q > 1.0:
+        raise ValueError("q must be between 0 and 1")
     ordered = sorted(values)
     if len(ordered) == 1:
         return ordered[0]
@@ -103,7 +115,10 @@ def benchmark_model(
     backend: str | None = None,
     accuracy: bool = True,
 ) -> BenchmarkResult:
-    sample_batch, _ = next(iter(val_loader))
+    try:
+        sample_batch, _ = next(iter(val_loader))
+    except StopIteration as exc:
+        raise ValueError("val_loader must contain at least one batch") from exc
     times_ms, peak_rss_mb = measure_latency_and_rss(
         model, sample_batch, warmup=warmup, iterations=iterations
     )

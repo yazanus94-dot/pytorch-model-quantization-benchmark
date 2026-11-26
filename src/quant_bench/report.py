@@ -10,6 +10,7 @@ import torch
 import torchvision
 
 from .benchmark import BenchmarkResult
+from .metrics import accuracy_delta_pp
 
 
 def write_machine_readable(results: list[BenchmarkResult], artifact_dir: Path, metadata: dict) -> tuple[Path, Path]:
@@ -66,7 +67,7 @@ def render_results_markdown(results: list[BenchmarkResult], metadata: dict) -> s
     ]
 
     for r in results:
-        delta = None if fp32 is None or fp32.top1_accuracy is None or r.top1_accuracy is None else r.top1_accuracy - fp32.top1_accuracy
+        delta = accuracy_delta_pp(fp32.top1_accuracy if fp32 is not None else None, r.top1_accuracy)
         lines.append(
             f"| {r.variant} | {r.dtype} | {_fmt(r.latency_ms_mean)} | {_fmt(r.latency_ms_p95)} | "
             f"{_fmt(r.throughput_images_per_s)} | {_fmt(r.serialized_size_mb)} | {_fmt(r.peak_process_rss_mb)} | "

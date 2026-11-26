@@ -71,7 +71,11 @@ def download_imagenette(data_root: Path = DEFAULT_DATA_ROOT) -> Path:
 def dataset_fingerprint(dataset_root: Path) -> str:
     """Stable lightweight fingerprint based on validation relative paths."""
     val_root = dataset_root / "val"
+    if not val_root.is_dir():
+        raise FileNotFoundError(f"Validation directory not found: {val_root}")
     paths = sorted(str(p.relative_to(val_root)) for p in val_root.rglob("*") if p.is_file())
+    if not paths:
+        raise ValueError(f"No validation files found under: {val_root}")
     digest = hashlib.sha256("\n".join(paths).encode("utf-8")).hexdigest()
     return digest[:16]
 
@@ -86,6 +90,8 @@ def make_val_loader(
     transform = ResNet18_Weights.DEFAULT.transforms()
     dataset: Dataset = ImagenetteImageNetLabels(dataset_root / "val", transform)
     if limit is not None:
+        if limit <= 0:
+            raise ValueError("limit must be > 0")
         dataset = Subset(dataset, range(min(limit, len(dataset))))
     return DataLoader(
         dataset,
@@ -106,7 +112,11 @@ def make_calibration_loader(
     transform = ResNet18_Weights.DEFAULT.transforms()
     train = ImagenetteImageNetLabels(dataset_root / "train", transform)
     generator = torch.Generator().manual_seed(7)
+    if calibration_samples <= 0:
+        raise ValueError("calibration_samples must be > 0")
     count = min(calibration_samples, len(train))
+    if count == 0:
+        raise ValueError("calibration dataset is empty")
     indices = torch.randperm(len(train), generator=generator)[:count].tolist()
     subset = Subset(train, indices)
     return DataLoader(subset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
