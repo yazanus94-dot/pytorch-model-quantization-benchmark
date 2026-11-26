@@ -124,6 +124,10 @@ Dynamic quantization is intentionally included even though it is not the stronge
 
 That difference is useful in an interview: it shows you understand that "INT8" is not a single implementation and that model architecture determines which quantization method is appropriate.
 
+## Upstream attribution
+
+This project is a fork of [Gopal3746/model-quantization](https://github.com/Gopal3746/model-quantization). Original authorship and Git history are preserved. Measurements originally reported upstream (Apple Silicon / QNNPACK) are retained only as reference in `docs/UPSTREAM_REFERENCE.md` and are not presented as results of this fork.
+
 ## Tests
 
 ```bash
